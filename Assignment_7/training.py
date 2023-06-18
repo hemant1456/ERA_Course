@@ -1,13 +1,15 @@
 # importing modules
 import torch
 import torch.nn.functional as F
+from tqdm import tqdm
 
 
 def train(model,device,train_loader,optimizer,epoch):
     model.train()
+    pbar= tqdm(train_loader)
     correct = 0
     processed = 0
-    for batch_idx, (data, target) in enumerate(train_loader):
+    for batch_idx, (data, target) in enumerate(pbar):
         # move the data to device
         data, target = data.to(device), target.to(device)
         # zero the gradients
@@ -23,8 +25,7 @@ def train(model,device,train_loader,optimizer,epoch):
         # print the progress
         correct += output.argmax(dim=1).eq(target).sum().item()
         processed += len(data)
-        if batch_idx % 200 == 0:
-            print(f'Epoch: {epoch+1} and batch idx: {batch_idx} Train loss is {loss.item()} Train Accuracy: {100*correct/processed:0.2f}')
+        pbar.set_description(f'Epoch: {epoch+1} and batch idx: {batch_idx} Train loss is {loss.item()} Train Accuracy: {100*correct/processed:0.2f}')
 
 def test(model,device,test_loader):
     model.eval()

@@ -13,21 +13,23 @@ class Model1(nn.Module):
                                         nn.ReLU(),
                                         nn.BatchNorm2d(8),
                                         nn.Dropout(0.1)) #26 rf=5
-        self.pool1= nn.MaxPool2d(2,2) #13
-        self.convblock3 = nn.Sequential(nn.Conv2d(in_channels=8,out_channels=16,kernel_size=(3,3),bias=False),
+        self.pool1= nn.MaxPool2d(2,2) #13 rf=6
+        self.convblock3 = nn.Sequential(nn.Conv2d(in_channels=8,out_channels=8,kernel_size=(3,3),bias=False),
                                         nn.ReLU(),
-                                        nn.BatchNorm2d(16),
-                                        nn.Dropout(0.1)) #11 rf=6
-        self.convblock4 = nn.Sequential(nn.Conv2d(in_channels=16,out_channels=16,kernel_size=(3,3),padding=1,bias=False),
-                                        nn.ReLU(),
-                                        nn.BatchNorm2d(16),
+                                        nn.BatchNorm2d(8),
                                         nn.Dropout(0.1)) #11 rf=10
-        self.pool2= nn.MaxPool2d(2,2) #5 , rf=12
+        self.convblock4 = nn.Sequential(nn.Conv2d(in_channels=8,out_channels=16,kernel_size=(3,3),padding=1,bias=False),
+                                        nn.ReLU(),
+                                        nn.BatchNorm2d(16),
+                                        nn.Dropout(0.1)) #11 rf=14
+        self.pool2= nn.MaxPool2d(2,2) #5 , rf=16
         self.convblock5 = nn.Sequential(nn.Conv2d(in_channels=16,out_channels=32,kernel_size=(3,3),bias=False),
                                         nn.ReLU(),
                                         nn.BatchNorm2d(32),
-                                        nn.Dropout(0.1)) #3 rf=20
-        self.convblock6 = nn.Sequential(nn.Conv2d(in_channels=32,out_channels=10,kernel_size=(3,3),bias=False)) #1 rf=28
+                                        nn.Dropout(0.1)) #3 rf=24
+        
+        self.convblock6 = nn.Sequential(nn.Conv2d(in_channels=32,out_channels=10,kernel_size=(1,1),bias=False)) #1 rf=32
+        self.fc1 = nn.Linear(90,10) #1 rf=28
 
     def forward(self,x):
         x = self.convblock1(x)
@@ -38,7 +40,8 @@ class Model1(nn.Module):
         x = self.pool2(x)
         x = self.convblock5(x)
         x = self.convblock6(x)
-        x = x.view(-1,10)
+        x = x.view(-1,90)
+        x= self.fc1(x)
         return F.log_softmax(x,dim=-1)
 
 
