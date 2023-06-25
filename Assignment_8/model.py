@@ -17,7 +17,6 @@ class Model_batch_norm(nn.Module):
         ) #32
     self.convblock3 = nn.Sequential(
         nn.Conv2d(32,16,1,bias=False,padding=1),
-        nn.ReLU(),
         nn.BatchNorm2d(16)
         ) #32
     self.pool1 = nn.MaxPool2d(2,2) #16
@@ -39,7 +38,6 @@ class Model_batch_norm(nn.Module):
         ) #16
     self.convblock7 = nn.Sequential(
         nn.Conv2d(32,16,1,bias=False,padding=1),
-        nn.ReLU(),
         nn.BatchNorm2d(16)
         ) #16
 
@@ -95,7 +93,6 @@ class Model_group_norm(nn.Module):
         ) #32
     self.convblock3 = nn.Sequential(
         nn.Conv2d(32,16,1,bias=False,padding=1),
-        nn.ReLU(),
         GroupNorm(4,16)
         ) #32
     self.pool1 = nn.MaxPool2d(2,2) #16
@@ -117,7 +114,6 @@ class Model_group_norm(nn.Module):
         ) #16
     self.convblock7 = nn.Sequential(
         nn.Conv2d(32,16,1,bias=False,padding=1),
-        nn.ReLU(),
         GroupNorm(4,16)
         ) #16
 
@@ -174,7 +170,6 @@ class Model_layer_norm(nn.Module):
         ) #32
     self.convblock3 = nn.Sequential(
         nn.Conv2d(32,16,1,bias=False,padding=1),
-        nn.ReLU(),
         GroupNorm(1,16)
         ) #32
     self.pool1 = nn.MaxPool2d(2,2) #16
@@ -196,7 +191,6 @@ class Model_layer_norm(nn.Module):
         ) #16
     self.convblock7 = nn.Sequential(
         nn.Conv2d(32,16,1,bias=False,padding=1),
-        nn.ReLU(),
         GroupNorm(1,16)
         ) #16
 
