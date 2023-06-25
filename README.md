@@ -34,10 +34,8 @@ This repository contains lectures and materials from an extensive course on Arti
 28. Training Multimodal GPTs
 29. Capstone Project
 
-## Usage
 
-Each lecture consists of a Jupyter notebook that covers the lecture material in depth. To run the notebooks, clone this repository and launch Jupyter Notebook.
 
 ```bash
 git clone https://github.com/hemant1456/ERA_Course.git
-cd AI_Deep_Learning_Course
+cd ERA_Course
