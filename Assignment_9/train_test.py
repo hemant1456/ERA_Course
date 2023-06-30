@@ -23,8 +23,8 @@ def train(model,device,train_loader,optimizer,scheduler):
         correct += pred.eq(target.view_as(pred)).sum().item()
         processed += len(data)
         pbar.set_description(f'Loss={loss.item()} Accuracy={100*correct/processed:0.2f}')
-        accuracy=100*correct/processed
-        return accuracy,loss.item()
+    accuracy=100*correct/processed
+    return accuracy,loss.item()
 
 def test(model,device,test_loader):
     model.eval()
