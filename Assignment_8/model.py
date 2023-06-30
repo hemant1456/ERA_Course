@@ -2,16 +2,17 @@ from torch.nn.modules.batchnorm import BatchNorm2d
 import torch.nn as nn
 import torch.nn.functional as F
 
+
 class Model_batch_norm(nn.Module):
   def __init__(self):
     super(Model_batch_norm,self).__init__()
     self.convblock1 = nn.Sequential(
-        nn.Conv2d(3,16,3,bias=False,padding=1),
+        nn.Conv2d(3,32,3,bias=False,padding=1),
         nn.ReLU(),
-        nn.BatchNorm2d(16)
+        nn.BatchNorm2d(32)
         ) #32
     self.convblock2 = nn.Sequential(
-        nn.Conv2d(16,32,3,bias=False,padding=1),
+        nn.Conv2d(32,32,3,bias=False,padding=1),
         nn.ReLU(),
         nn.BatchNorm2d(32)
         ) #32
@@ -68,8 +69,13 @@ class Model_batch_norm(nn.Module):
         nn.Conv2d(64,10,1,bias=False),
         ) #1
   def forward(self,x):
-    x= self.pool1(self.convblock3(self.convblock2(self.convblock1(x))))
-    x= self.pool2(self.convblock7(self.convblock6(self.convblock5(self.convblock4(x)))))
+    x= self.convblock1(x)
+    x= x+ self.convblock2(x)
+    x= self.pool1(self.convblock3(x))
+    x= self.convblock4(x)
+    x= x+ self.convblock5(x)
+    x = x+ self.convblock6(x)
+    x= self.pool2(self.convblock7(x))
     x= self.convblock10(self.convblock9(self.convblock8(x)))
     x= self.gap(x)
     x=self.convblock11(x)
