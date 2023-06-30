@@ -91,20 +91,20 @@ class Net(nn.Module):
         nn.Conv2d(64,10,1,bias=False),
         ) #1
   def forward(self,x):
-    x= self.convblock1(x)
-    x= x+ self.convblock3(x) + self.convblock2(x)
-    x= self.pool1(x)
+    x= self.convblock1(x) # rf=3
+    x= x+ self.convblock3(x) + self.convblock2(x) # rf = 3, 5, 7
+    x= self.pool1(x) # rf = 5, 7, 9  # j_in=2
 
-    x= self.convblock4(x)
-    x= x+ self.convblock6(x) + self.convblock5(x)
-    x= self.pool2(x)
+    x= self.convblock4(x) # rf = 9,11,13 
+    x= x+ self.convblock6(x) + self.convblock5(x) # rf= 9, 11, 13,    13, 15, 17,     15, 17, 19
+    x= self.pool2(x) # rf = 13, 15, 17,  17, 19, 21,   19, 21, 23 # j_in=4
 
-    x= self.convblock7(x)
-    x= x+ self.convblock9(x) + self.convblock8(x)
-    x= self.pool3(x)
+    x= self.convblock7(x) # rf = 21, 23, 25   25, 27, 29,   29, 31, 33
+    x= x+ self.convblock9(x) + self.convblock8(x)  
+    x= self.pool3(x) 
 
-    x= self.convblock10(x)
-    x= self.convblock11(x)
+    x= self.convblock10(x) 
+    x= self.convblock11(x) 
 
     x= self.gap(x)
     x=self.convblock12(x)

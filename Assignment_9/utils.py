@@ -106,3 +106,38 @@ def plot_images(original_images, transformed_images,labels):
     plt.show()
 
 
+def test_and_find_misclassified(model, dataloader,device):
+    model.eval()
+    misclassified_images = []
+    misclassified_labels = []
+    misclassified_preds = []
+    
+    with torch.no_grad():
+        for batch in dataloader:
+            inputs = batch[0].to(device)
+            labels = batch[1].to(device)
+            outputs = model(inputs)
+            _, predictions = torch.max(outputs, 1)
+            
+            # find the indices of the misclassified images
+            misclassified_indices = torch.where(predictions != labels)[0]
+            
+            # store the misclassified images, true labels and predictions
+            misclassified_images.append(inputs[misclassified_indices])
+            misclassified_labels.append(labels[misclassified_indices])
+            misclassified_preds.append(predictions[misclassified_indices])
+            
+    return misclassified_images, misclassified_labels, misclassified_preds
+
+def display_misclassified_images(images, labels, preds, title):
+    plt.figure(figsize=(10, 10))
+    for i in range(12):
+        plt.subplot(4, 3, i+1)
+        image = images[i].numpy().transpose((1, 2, 0))  # adjust this if your image is not 3-channel RGB
+        image = (image - image.min()) / (image.max() - image.min())  # normalise to [0,1]
+        plt.imshow(image)
+        plt.axis('off')
+        plt.title(f'Actual: {cifar10_classes[labels[i].item()]}, Predicted: {cifar10_classes[preds[i].item()]}')
+    plt.suptitle(title)
+    plt.show()
+
