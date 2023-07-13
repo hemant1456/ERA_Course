@@ -11,7 +11,7 @@ def train(model,device,train_loader,optimizer,scheduler):
         data,target = data.to(device),target.to(device)
         optimizer.zero_grad()
         output = model(data)
-        loss = F.nll_loss(output,target)
+        loss = F.cross_entropy(output, target)
         loss.backward()
         optimizer.step()
 
@@ -34,7 +34,7 @@ def test(model,device,test_loader):
         for data,target in test_loader:
             data,target = data.to(device),target.to(device)
             output = model(data)
-            test_loss += F.nll_loss(output,target,reduction='sum').item()
+            test_loss += F.cross_entropy(output, target)
             pred = output.argmax(dim=1,keepdim=True)
             correct += pred.eq(target.view_as(pred)).sum().item()
     test_loss /= len(test_loader.dataset)
