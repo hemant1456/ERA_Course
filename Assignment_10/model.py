@@ -1,112 +1,55 @@
 import torch.nn as nn
 import torch.nn.functional as F
 
+def convblock(in_channels,out_channels,padding=0,**kwargs):
+    return nn.Sequential(
+        nn.Conv2d(in_channels,out_channels,padding=padding,**kwargs),
+        nn.ReLU(),
+        nn.BatchNorm2d(out_channels)
+        )
+
 class Net(nn.Module):
   def __init__(self):
     super(Net,self).__init__()
-    self.convblock1 = nn.Sequential(
-        nn.Conv2d(3,32,3,bias=False,padding=1),
-        nn.ReLU(),
-        nn.BatchNorm2d(32)
-        ,nn.Dropout(0.05)
-        ) #32
+    self.PrepLayer = convblock(in_channels=3,out_channels=64,kernel_size=3,padding=1,bias=False) #32
+    self.convblock1 = convblock(in_channels=64,out_channels=128,kernel_size=3,padding=1,bias=False) #32
 
-    self.convblock2 = nn.Sequential(
-        nn.Conv2d(32,32,3,bias=False,padding=1),
-        nn.ReLU(),
-        nn.BatchNorm2d(32)
-        ,nn.Dropout(0.05)
-        ) #32
+    self.pool1= nn.MaxPool2d(2,2) #16
 
-    self.convblock3 = nn.Sequential(
-        nn.Conv2d(32,32,3,bias=False,padding=2,dilation=2),
-        nn.ReLU(),
-        nn.BatchNorm2d(32)
-        ,nn.Dropout(0.05)
-        ) #32
+    self.R1_c1= convblock(in_channels=128,out_channels=128,kernel_size=3,bias=False,padding=1) #16
+    self.R1_c2= convblock(in_channels=128,out_channels=128,kernel_size=3,padding=1,bias=False) #16
 
-    self.pool1 = nn.Conv2d(32,32,3,stride=2,padding=1) #16
+    self.convblock2 = convblock(in_channels=128,out_channels=256,kernel_size=3,padding=1,bias=False) #16
 
-    self.convblock4 = nn.Sequential(
-        nn.Conv2d(32,32,3,bias=False,padding=1),
-        nn.ReLU(),
-        nn.BatchNorm2d(32)
-        ,nn.Dropout(0.05)
-        ) #16
+    self.pool2 = nn.MaxPool2d(2,2) #8
 
-    self.convblock5 = nn.Sequential(
-        nn.Conv2d(32,32,3,bias=False,padding=2,dilation=2),
-        nn.ReLU(),
-        nn.BatchNorm2d(32)
-        ,nn.Dropout(0.05)
-        ) #16
-    
-    self.convblock6 = nn.Sequential(
-        nn.Conv2d(32,32,3,bias=False,padding=1),
-        nn.ReLU(),
-        nn.BatchNorm2d(32)
-        ,nn.Dropout(0.05)
-        ) #16
+    self.convblock3 = convblock(in_channels=256,out_channels=512,kernel_size=3,padding=1,bias=False) #8
+    self.pool3 = nn.MaxPool2d(2,2) #4
 
-    self.pool2 = nn.Conv2d(32,32,3,stride=2,padding=1) #8
+    self.R2_c1= convblock(in_channels=512,out_channels=512,kernel_size=3,padding=1,bias=False) #4
+    self.R2_c2= convblock(in_channels=512,out_channels=512,kernel_size=3,padding=1,bias=False) #4
 
-    self.convblock7 = nn.Sequential(
-        nn.Conv2d(32,32,3,bias=False,padding=1),
-        nn.ReLU(),
-        nn.BatchNorm2d(32)
-        ,nn.Dropout(0.05)
-        ) #8
+    self.pool4 = nn.MaxPool2d(4,4) #1
 
-    self.convblock8 = nn.Sequential(
-        nn.Conv2d(32,32,3,bias=False,dilation=2,padding=2),
-        nn.ReLU(),
-        nn.BatchNorm2d(32)
-        ,nn.Dropout(0.05)
-        ) #8
-    self.convblock9 = nn.Sequential(
-        nn.Conv2d(32,32,3,bias=False,padding=1),
-        nn.ReLU(),
-        nn.BatchNorm2d(32)
-        ,nn.Dropout(0.05)
-        ) #8
+    self.fc1 = nn.Linear(512,10)
 
-    self.pool3 = nn.Conv2d(32,32,3,stride=2,padding=1) #4
-
-    self.convblock10 = nn.Sequential(
-        nn.Conv2d(32,32,3,bias=False,padding=1),
-        nn.ReLU(),
-        nn.BatchNorm2d(32)
-        ) #4
-    self.convblock11 = nn.Sequential(
-        nn.Conv2d(32,64,3,bias=False),
-        nn.ReLU(),
-        nn.BatchNorm2d(64)
-        ) #4
-
-    self.gap = nn.Sequential(
-        nn.AdaptiveAvgPool2d(1)
-        ) #1
-
-    self.convblock12 = nn.Sequential(
-        nn.Conv2d(64,10,1,bias=False),
-        ) #1
   def forward(self,x):
-    x= self.convblock1(x) # rf=3
-    x= x+ self.convblock3(x) + self.convblock2(x) # rf = 3, 5, 7
-    x= self.pool1(x) # rf = 5, 7, 9  # j_in=2
+    x=self.PrepLayer(x)
+    #layer1
+    x=self.pool1(self.convblock1(x))
+    R1 = self.R1_c2(self.R1_c1(x))
+    x = x + R1
+    #layer2
+    x=self.pool2(self.convblock2(x))
+    #layer3
+    x=self.pool3(self.convblock3(x))
+    R2 = self.R2_c2(self.R2_c1(x))
+    x = x + R2
+    #layer4
+    x=self.pool4(x)
 
-    x= self.convblock4(x) # rf = 9,11,13 
-    x= x+ self.convblock6(x) + self.convblock5(x) # rf= 9, 11, 13,    13, 15, 17,     15, 17, 19
-    x= self.pool2(x) # rf = 13, 15, 17,  17, 19, 21,   19, 21, 23 # j_in=4
+    x=x.view(-1,512)
+    x= self.fc1(x)
 
-    x= self.convblock7(x) # rf = 21, 23, 25   25, 27, 29,   29, 31, 33
-    x= x+ self.convblock9(x) + self.convblock8(x)  
-    x= self.pool3(x) 
-
-    x= self.convblock10(x) 
-    x= self.convblock11(x) 
-
-    x= self.gap(x)
-    x=self.convblock12(x)
     x=x.view(-1,10)
     return F.log_softmax(x)
