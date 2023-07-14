@@ -4,7 +4,7 @@ import torch
 
 from albumentations import PadIfNeeded
 from albumentations.augmentations.dropout.coarse_dropout import CoarseDropout
-from albumentations import Compose, Normalize, HorizontalFlip, PadIfNeeded, RandomCrop, CoarseDropout, ToTensorV2
+from albumentations import Compose, Normalize, HorizontalFlip, PadIfNeeded, RandomCrop, CoarseDropout
 from albumentations.pytorch import ToTensorV2
 from albumentations.augmentations.geometric.transforms import Affine
 
