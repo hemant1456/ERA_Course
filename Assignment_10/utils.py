@@ -4,7 +4,7 @@ import torch
 
 from albumentations import PadIfNeeded
 from albumentations.augmentations.dropout.coarse_dropout import CoarseDropout
-from albumentations import CenterCrop,HorizontalFlip, VerticalFlip, Rotate, Normalize
+from albumentations import Compose, Normalize, HorizontalFlip, PadIfNeeded, RandomCrop, CoarseDropout, ToTensorV2
 from albumentations.pytorch import ToTensorV2
 from albumentations.augmentations.geometric.transforms import Affine
 
@@ -21,13 +21,14 @@ class Albumentations:
     return self.transforms(image=img)['image']
 
 
-train_transforms= Albumentations([
-    PadIfNeeded(min_height=64,min_width=64),
-    CoarseDropout(min_height=16,min_width=16, max_height=16, max_width=16, max_holes=1,p=1,fill_value=(0.49139968*255,0.48215841*255,0.44653091*255)),
-    CenterCrop(32,32,p=1),
-    Affine(scale=(0.5, 2),translate_percent=(0.2, 0.2),rotate=(-45, 45),shear=(-10, 10),interpolation=1,p=0.3,cval=(0.49139968*255,0.48215841*255,0.44653091*255)),
-    Normalize((0.49139968,0.48215841,0.44653091),(0.24703223,0.24348513,0.26158784)),
-    ToTensorV2()
+
+train_transforms = Compose([
+    PadIfNeeded(min_height=36, min_width=36),  # Padding
+    RandomCrop(32, 32),  # RandomCrop after padding
+    HorizontalFlip(p=0.5),  # FlipLR
+    CoarseDropout(max_holes=1, max_height=8, max_width=8, min_height=8, min_width=8, fill_value=(0.49139968*255,0.48215841*255,0.44653091*255), p=0.5),  # Cutout
+    Normalize((0.49139968,0.48215841,0.44653091),(0.24703223,0.24348513,0.26158784)),  # Normalizing
+    ToTensorV2()  # Convert to tensor
 ])
 
 test_transforms= Albumentations([
@@ -51,14 +52,14 @@ cifar10_classes = {
 
 def visualise_transformation():
 
-    train_transforms1= Albumentations([
-        PadIfNeeded(min_height=64,min_width=64),
-        CoarseDropout(min_height=16,min_width=16, max_height=16, max_width=16, max_holes=1,p=1,fill_value=(0.49139968*255,0.48215841*255,0.44653091*255)),
-        CenterCrop(32,32,p=1),
-        Affine(scale=(0.5, 2),translate_percent=(0.1, 0.1),rotate=(-20, 20),shear=(-10, 10),interpolation=1,p=0.3,cval=(0.49139968*255,0.48215841*255,0.44653091*255)),
-        #Normalize((0.49139968,0.48215841,0.44653091),(0.24703223,0.24348513,0.26158784)),
-        ToTensorV2()
-    ])
+    train_transforms1 = Compose([
+    PadIfNeeded(min_height=36, min_width=36),  # Padding
+    RandomCrop(32, 32),  # RandomCrop after padding
+    HorizontalFlip(p=0.5),  # FlipLR
+    CoarseDropout(max_holes=1, max_height=8, max_width=8, min_height=8, min_width=8, fill_value=(0.49139968*255,0.48215841*255,0.44653091*255), p=0.5),  # Cutout
+    Normalize((0.49139968,0.48215841,0.44653091),(0.24703223,0.24348513,0.26158784)),  # Normalizing
+    ToTensorV2()  # Convert to tensor
+])
 
     train_transforms2= Albumentations([
         ToTensorV2()
