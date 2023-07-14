@@ -123,9 +123,10 @@ def test_and_find_misclassified(model, dataloader,device):
             misclassified_indices = torch.where(predictions != labels)[0]
             
             # store the misclassified images, true labels and predictions
-            misclassified_images.append(inputs[misclassified_indices])
-            misclassified_labels.append(labels[misclassified_indices])
-            misclassified_preds.append(predictions[misclassified_indices])
+            for index in misclassified_indices:
+               misclassified_images.append(inputs[index].cpu())
+               misclassified_labels.append(labels[index].cpu())
+               misclassified_preds.append(predictions[index].cpu())
             
     return misclassified_images, misclassified_labels, misclassified_preds
 
