@@ -52,4 +52,4 @@ class Net(nn.Module):
     x= self.fc1(x)
 
     x=x.view(-1,10)
-    return F.log_softmax(x)
+    return x
