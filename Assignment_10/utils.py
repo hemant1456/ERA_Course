@@ -20,20 +20,20 @@ class Albumentations:
     img= np.array(image)
     return self.transforms(image=img)['image']
 
+from albumentations import Lambda
 
-
-train_transforms = Compose([
+train_transforms = Albumentations([
     PadIfNeeded(min_height=36, min_width=36),  # Padding
     RandomCrop(32, 32),  # RandomCrop after padding
     HorizontalFlip(p=0.5),  # FlipLR
-    CoarseDropout(max_holes=1, max_height=8, max_width=8, min_height=8, min_width=8, fill_value=(0.49139968*255,0.48215841*255,0.44653091*255), p=0.5),  # Cutout
-    Normalize((0.49139968,0.48215841,0.44653091),(0.24703223,0.24348513,0.26158784)),  # Normalizing
+    CoarseDropout(max_holes=1, max_height=8, max_width=8, min_height=8, min_width=8, fill_value=(0.4914*255, 0.4822*255, 0.4465*255), p=0.5),  # Cutout
+    Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010)),  # Normalizing
     ToTensorV2()  # Convert to tensor
 ])
 
 test_transforms= Albumentations([
-    Normalize((0.49139968,0.48215841,0.44653091),(0.24703223,0.24348513,0.26158784)),
-    ToTensorV2()
+    Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010)),  # Normalizing
+    ToTensorV2()  # Convert to tensor
 ])
 
 cifar10_classes = {
@@ -52,17 +52,16 @@ cifar10_classes = {
 
 def visualise_transformation():
 
-    train_transforms1 = Compose([
-    PadIfNeeded(min_height=36, min_width=36),  # Padding
+    train_transforms1 = Albumentations([
+    PadIfNeeded(min_height=40, min_width=40),  # Padding
     RandomCrop(32, 32),  # RandomCrop after padding
     HorizontalFlip(p=0.5),  # FlipLR
-    CoarseDropout(max_holes=1, max_height=8, max_width=8, min_height=8, min_width=8, fill_value=(0.49139968*255,0.48215841*255,0.44653091*255), p=0.5),  # Cutout
-    Normalize((0.49139968,0.48215841,0.44653091),(0.24703223,0.24348513,0.26158784)),  # Normalizing
+    CoarseDropout(max_holes=1, max_height=8, max_width=8, min_height=8, min_width=8, fill_value=(0.4914*255, 0.4822*255, 0.4465*255), p=0.5),  # Cutout
+    Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010)),  # Normalizing
     ToTensorV2()  # Convert to tensor
 ])
-
     train_transforms2= Albumentations([
-        ToTensorV2()
+       ToTensorV2()
     ])
 
     train_data1= datasets.CIFAR10(root= '../data', train= True, download= True, transform= train_transforms1)
@@ -82,11 +81,16 @@ def visualise_transformation():
     plot_images(original_images, transformed_images, labels1)
 
 
-
+def unnormalize(img, mean, std):
+    for t, m, s in zip(img, mean, std):  # for each channel
+        t.mul_(s).add_(m)  # unnormalize
+    return img
 
 def plot_images(original_images, transformed_images,labels):
     temp=0
     pointer=0
+    mean = torch.tensor([0.4914, 0.4822, 0.4465])
+    std = torch.tensor([0.2023, 0.1994, 0.2010])
     plt.figure(figsize=(8,8))
     for i in range(1,17):
         
@@ -94,12 +98,12 @@ def plot_images(original_images, transformed_images,labels):
         plt.axis('off')
         plt.tight_layout()
         if temp==0:
-          
-          plt.imshow(original_images[pointer].permute(1,2,0))
-          plt.title(cifar10_classes[labels[pointer].item()])
-          temp=1
+            plt.imshow(original_images[pointer].permute(1,2,0))
+            plt.title(cifar10_classes[labels[pointer].item()])
+            temp=1
         else:
-          plt.imshow(transformed_images[pointer].permute(1,2,0))
+          img = unnormalize(transformed_images[pointer], mean, std)
+          plt.imshow(img.permute(1,2,0))
           temp=0
           pointer+=1
 
