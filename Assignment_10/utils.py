@@ -23,7 +23,7 @@ class Albumentations:
 from albumentations import Lambda
 
 train_transforms = Albumentations([
-    PadIfNeeded(min_height=36, min_width=36),  # Padding
+    PadIfNeeded(min_height=40, min_width=40),  # Padding
     RandomCrop(32, 32),  # RandomCrop after padding
     HorizontalFlip(p=0.5),  # FlipLR
     CoarseDropout(max_holes=1, max_height=8, max_width=8, min_height=8, min_width=8, fill_value=(0.4914*255, 0.4822*255, 0.4465*255), p=0.5),  # Cutout
